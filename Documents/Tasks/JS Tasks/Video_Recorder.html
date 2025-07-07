@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Webcam Recorder (5 / 10 / 15 s)</title>
+  <style>
+    body   { background:#333; color:#fff; text-align:center; font-family:sans-serif; }
+    video  { border:2px solid #666; border-radius:8px; width:320px; height:240px; margin:10px;}
+    select,button { padding:8px 14px; font-size:16px; margin:6px; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <h2>🎥 Short Video Recorder</h2>
+  
+  <video id="preview" autoplay playsinline muted></video><br>
+
+  <label>
+    Duration:
+    <select id="durSelect">
+      <option value="5">5 sec</option>
+      <option value="10">10 sec</option>
+      <option value="15">15 sec</option>
+    </select>
+  </label>
+  <button id="recordBtn">🔴 Record</button><br>
+
+  <video id="playback" controls style="display:none;"></video>
+
+  <script>
+    const preview   = document.getElementById('preview');
+    const playback  = document.getElementById('playback');
+    const durSelect = document.getElementById('durSelect');
+    const btn       = document.getElementById('recordBtn');
+    let recorder, chunks = [];
+
+    // Get webcam + mic
+    navigator.mediaDevices.getUserMedia({ video:true, audio:true })
+      .then(stream => {
+        preview.srcObject = stream;
+        recorder = new MediaRecorder(stream);
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type:'video/webm' });
+          playback.src = URL.createObjectURL(blob);
+          playback.style.display = 'block';
+          chunks = [];
+        };
+      })
+      .catch(err => alert('Webcam error: ' + err));
+
+    // Record for selected duration
+    btn.onclick = () => {
+      if (recorder && recorder.state === 'inactive') {
+        const ms = +durSelect.value * 1000;   // convert sec → ms
+        recorder.start();
+        btn.disabled = true;
+        setTimeout(() => {
+          recorder.stop();
+          btn.disabled = false;
+        }, ms);
+      }
+    };
+  </script>
+</body>
+</html>

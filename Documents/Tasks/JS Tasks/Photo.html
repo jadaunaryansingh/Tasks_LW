@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Capture Photo with Webcam</title>
+  <style>
+    video, canvas {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      margin: 10px;
+      width: 320px;
+      height: 240px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body style='background-color:gray;color:white;'>
+<center>
+  <h2>📸 Capture Photo Using Webcam</h2>
+  <video id="webcam" autoplay></video>
+  <canvas id="snapshot"></canvas><br>
+  <button onclick="capturePhoto()">Capture Photo</button>
+
+  <script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('snapshot');
+    const context = canvas.getContext('2d');
+
+    // Start webcam stream
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        video.srcObject = stream;
+      })
+      .catch((err) => {
+        console.error("Error accessing webcam:", err);
+        alert("Webcam access denied or not supported.");
+      });
+
+    // Capture photo from video
+    function capturePhoto() {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+  </script>
+</center>
+</body>
+</html>
